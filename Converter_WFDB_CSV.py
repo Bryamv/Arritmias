@@ -22,29 +22,3 @@ output_csv = '100.csv'
 
 # Llamar a la función para convertir el archivo WFDB a CSV
 wfdb_to_csv(record_name, output_csv)
-
-
-import pandas as pd
-import matplotlib.pyplot as plt
-
-# Cargar el archivo CSV convertido desde el archivo WFDB
-df = pd.read_csv(output_csv)
-
-# Graficar todas las señales
-plt.figure(figsize=(12, 6))
-
-# Suponiendo que df es tu DataFrame y 'columna' es el nombre de la columna que deseas sacar
-columna_extraida = df['V5']
-
-
-plt.plot(columna_extraida.index, columna_extraida, label='V5')
-
-# Ajustar la leyenda y etiquetas de los ejes
-plt.legend()
-plt.xlabel('Muestras')
-plt.ylabel('Amplitud')
-plt.title('Señales del archivo WFDB convertido a CSV')
-plt.grid(True)
-
-# Mostrar la gráfica
-plt.show()
