@@ -16,6 +16,8 @@ ecg_signal = record.p_signal[:, 0]  # Usar solo una derivación si hay varias
 # Obtener las anotaciones de los picos
 annotations = wfdb.rdann('100', 'atr')
 
+print(annotations)
+
 # Obtener los índices de los picos R (QRS complexes)
 qrs_indices = annotations.sample
 
