@@ -5,7 +5,8 @@ from scipy.signal import butter, filtfilt
 import matplotlib.pyplot as plt
 import pywt
 from tensorflow.keras.models import load_model
-
+global model
+model = load_model('ten_file_model.h5')
 
 def denoise(data):  
     w = pywt.Wavelet('sym4') 
@@ -20,6 +21,14 @@ def denoise(data):
     
     return datarec
 
+def predict_model(signal):
+    # Realizar la predicción con el modelo
+    predicted_class = model.predict(signal.reshape(1, 360, 1))
+
+    if (np.argmax(predicted_class) != 0):
+        return True
+    return False
+    
 ## este en teoria detecta ondas P
 def detectar_ondas_p(ecg_signal, fs):
 
@@ -50,15 +59,21 @@ fs = record.fs  # Frecuencia de muestreo de la señal de ECG
 denoised_signal = denoise(ecg_signal)
 p_wave_signals = detectar_ondas_p(denoised_signal, fs)
 
-#graficar el pico de onda R
-plt.figure(figsize=(10, 6))
-plt.grid(True)
-print(len(p_wave_signals[1]))
-plt.plot(range(len(p_wave_signals[1])), p_wave_signals[1], label=f'Onda P', color='red')
-
-
-
+for p_wave_signal in p_wave_signals: 
+    # Asegurar que la señal tenga la longitud correcta
+    if len(p_wave_signal) != 360:  # Suponiendo que tu modelo espera una entrada de longitud 360
+        continue
     
+    predicted_class = predict_model(p_wave_signal)
+    
+    # Decidir el color de la línea según la predicción
+    color = 'red' if predicted_class == True else 'blue'
+    
+    # Graficar la señal con el color correspondiente
+    plt.plot(range(len(p_wave_signal)), p_wave_signal, label=f'Onda P', color=color)
+
+
+
 
 plt.title('Señales de las Ondas P')
 plt.xlabel('Muestras')
@@ -69,7 +84,7 @@ plt.show()
 
 
 # Cargar el modelo
-model = load_model('ten_file_model.h5')
+
 
 # Predecir la clase de la señal de la onda P
 # predicted_class = model.predict(new_signal.reshape(1,360,1))
