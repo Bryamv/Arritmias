@@ -1,7 +1,6 @@
 import numpy as np
 import wfdb
 from scipy.signal import find_peaks
-from scipy.signal import butter, filtfilt
 import matplotlib.pyplot as plt
 import pywt
 from tensorflow.keras.models import load_model
@@ -36,19 +35,16 @@ def detectar_ondas_p(ecg_signal, fs):
     qrs_indices = find_peaks(ecg_signal, height= 0.2)[0] 
 
     # Tomamos el fin y el inicio de la onda P
-    p_wave_signals = []
+    vector_p_wave = []
     for qrs_index in qrs_indices:
         # Calcular el inicio y el fin del intervalo para la onda P
         p_start = max(0, qrs_index - 180)  # Evitar índices negativos
-        p_end = min(len(ecg_signal), qrs_index + 180)  # Evitar desbordamiento
+        p_end = min(len(ecg_signal)-1, qrs_index + 180)  # Evitar desbordamiento
 
         # Extraer la señal de la onda P
-        p_wave_signal = ecg_signal[p_start:p_end]
+        vector_p_wave.append([p_start, p_end])
 
-        # Guardar la señal de la onda P
-        p_wave_signals.append(p_wave_signal)
-
-    return p_wave_signals
+    return np.array(vector_p_wave)
 
 # Cargar la señal de ECG desde un archivo WFDB
 record = wfdb.rdrecord('./100', channels=[0])  # 'archivo_wfdb' es el nombre del archivo WFDB
@@ -56,36 +52,18 @@ ecg_signal = record.p_signal.flatten()
 fs = record.fs  # Frecuencia de muestreo de la señal de ECG
 
 # Ejemplo de uso
-denoised_signal = denoise(ecg_signal)
-p_wave_signals = detectar_ondas_p(denoised_signal, fs)
-
-for p_wave_signal in p_wave_signals: 
-    # Asegurar que la señal tenga la longitud correcta
-    if len(p_wave_signal) != 360:  # Suponiendo que tu modelo espera una entrada de longitud 360
-        continue
-    
-    predicted_class = predict_model(p_wave_signal)
-    
-    # Decidir el color de la línea según la predicción
-    color = 'red' if predicted_class == True else 'blue'
-    
-    # Graficar la señal con el color correspondiente
-    plt.plot(range(len(p_wave_signal)), p_wave_signal, label=f'Onda P', color=color)
-
-
-
-
-plt.title('Señales de las Ondas P')
-plt.xlabel('Muestras')
-plt.ylabel('Amplitud')
-plt.legend()
-plt.grid(True)
+denoised_signal = denoise(ecg_signal)#x_signal
+p_wave_signals = detectar_ondas_p(denoised_signal, fs)#x_waves points
+p_wave_signals = np.unique(p_wave_signals.flatten())
+print(p_wave_signals.shape)
+# print(p_wave_signals)
+X_mask = np.zeros(len(denoised_signal))
+print(p_wave_signals)
+X_mask[p_wave_signals] = 1
+print(X_mask)
+# print(len(X_mask))
+# print(p_wave_signals)
+plt.plot(denoised_signal, label='Ondas P', color='r')
+# plt.plot(X_mask*denoised_signal, label='Ondas P', color='r')
+plt.plot(np.abs(X_mask-1)*denoised_signal, label='ECG', color='b')
 plt.show()
-
-
-# Cargar el modelo
-
-
-# Predecir la clase de la señal de la onda P
-# predicted_class = model.predict(new_signal.reshape(1,360,1))
-# print(f'Clase predicha: {predicted_class}')
