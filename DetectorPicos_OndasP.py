@@ -51,7 +51,7 @@ def detectar_ondas_p(ecg_signal, fs):
     return p_wave_signals
 
 # Cargar la señal de ECG desde un archivo WFDB
-record = wfdb.rdrecord('./100', channels=[0])  # 'archivo_wfdb' es el nombre del archivo WFDB
+record = wfdb.rdrecord('./118', channels=[0])  # 'archivo_wfdb' es el nombre del archivo WFDB
 ecg_signal = record.p_signal.flatten()
 fs = record.fs  # Frecuencia de muestreo de la señal de ECG
 
@@ -69,8 +69,13 @@ for p_wave_signal in p_wave_signals:
     # Decidir el color de la línea según la predicción
     color = 'red' if predicted_class == True else 'blue'
     
-    # Graficar la señal con el color correspondiente
-    plt.plot(range(len(p_wave_signal)), p_wave_signal, label=f'Onda P', color=color)
+    if predicted_class == True:
+        # Graficar la señal con el color correspondiente
+        plt.plot(range(len(p_wave_signal)), p_wave_signal, label=f'Onda P', color=color)
+        break
+
+
+    
 
 
 
