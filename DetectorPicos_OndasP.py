@@ -61,7 +61,7 @@ p_wave_signals = detectar_ondas_p(denoised_signal, fs)
 
 plt.figure(figsize=(10, 6))
 
-cont=0
+
 for p_wave_signal, time in p_wave_signals: 
     # Asegurar que la señal tenga la longitud correcta
     if len(p_wave_signal) != 360:  # Suponiendo que tu modelo espera una entrada de longitud 360
@@ -76,8 +76,7 @@ for p_wave_signal, time in p_wave_signals:
     plt.plot(np.arange(len(p_wave_signal))/fs + time, p_wave_signal, color=color)
     cont = cont + 1
 
-    if(cont==10):
-        break
+    
     
     
 
